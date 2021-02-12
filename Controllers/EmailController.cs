@@ -19,12 +19,27 @@ namespace PhoneBook.Controllers
             _context = context;
         }
 
-        // GET: Email
-        public async Task<IActionResult> Index()
+        // // GET: Email
+        // public async Task<IActionResult> Index()
+        // {
+        //     var phoneBookContext = _context.Emails.Include(e => e.Person);
+        //     return View(await phoneBookContext.ToListAsync());
+        // }
+
+
+        // GET: Email/5
+        public async Task<IActionResult> Index(int? id)
         {
-            var phoneBookContext = _context.Emails.Include(e => e.Person);
-            return View(await phoneBookContext.ToListAsync());
+            if (id == null)
+            {
+                return NotFound();
+            }
+           
+           var phoneBookContext = await _context.Emails.Include(e => e.Person).Where(m => m.PersonEmile == id).ToListAsync();
+
+            return View(phoneBookContext);
         }
+
 
         // GET: Email/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -48,7 +63,7 @@ namespace PhoneBook.Controllers
         // GET: Email/Create
         public IActionResult Create()
         {
-            ViewData["PersonEmile"] = new SelectList(_context.Persons, "PersonId", "PersonId");
+            ViewData["PersonEmile"] = new SelectList(_context.Persons, "PersonId", "Name");
             return View();
         }
 
@@ -63,7 +78,9 @@ namespace PhoneBook.Controllers
             {
                 _context.Add(email);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
+                return RedirectToRoute(new { controller="Person", action="Index"});
+               
             }
             ViewData["PersonEmile"] = new SelectList(_context.Persons, "PersonId", "PersonId", email.PersonEmile);
             return View(email);
@@ -82,7 +99,7 @@ namespace PhoneBook.Controllers
             {
                 return NotFound();
             }
-            ViewData["PersonEmile"] = new SelectList(_context.Persons, "PersonId", "PersonId", email.PersonEmile);
+            ViewData["PersonEmile"] = new SelectList(_context.Persons, "PersonId", "Name", email.PersonEmile);
             return View(email);
         }
 
@@ -116,7 +133,9 @@ namespace PhoneBook.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
+                return RedirectToRoute(new { controller="Person", action="Index"});
+               
             }
             ViewData["PersonEmile"] = new SelectList(_context.Persons, "PersonId", "PersonId", email.PersonEmile);
             return View(email);
@@ -149,7 +168,9 @@ namespace PhoneBook.Controllers
             var email = await _context.Emails.FindAsync(id);
             _context.Emails.Remove(email);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            //return RedirectToAction(nameof(Index));
+            return RedirectToRoute(new { controller="Person", action="Index"});
+               
         }
 
         private bool EmailExists(int id)

@@ -19,12 +19,28 @@ namespace PhoneBook.Controllers
             _context = context;
         }
 
-        // GET: Phone
-        public async Task<IActionResult> Index()
+        // // GET: Phone
+        // public async Task<IActionResult> Index()
+        // {
+        //     var phoneBookContext = _context.Phones.Include(p => p.Person);
+        //     return View(await phoneBookContext.ToListAsync());
+        // }
+
+
+
+        // // GET: Phone/5
+        public async Task<IActionResult> Index(int? id)
         {
-            var phoneBookContext = _context.Phones.Include(p => p.Person);
-            return View(await phoneBookContext.ToListAsync());
+            if (id == null)
+            {
+                return NotFound();
+            }
+           
+           var phoneBookContext = await _context.Phones.Include(p => p.Person).Where(m => m.PersonPhone == id).ToListAsync();
+
+            return View(phoneBookContext);
         }
+
 
         // GET: Phone/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -48,7 +64,8 @@ namespace PhoneBook.Controllers
         // GET: Phone/Create
         public IActionResult Create()
         {
-            ViewData["PersonPhone"] = new SelectList(_context.Persons, "PersonId", "PersonId");
+            ViewData["PersonPhone"] = new SelectList(_context.Persons, "PersonId", "Name");
+            
             return View();
         }
 
@@ -63,8 +80,11 @@ namespace PhoneBook.Controllers
             {
                 _context.Add(phone);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
+                return RedirectToRoute(new { controller="Person", action="Index"});
+               
             }
+            
             ViewData["PersonPhone"] = new SelectList(_context.Persons, "PersonId", "PersonId", phone.PersonPhone);
             return View(phone);
         }
@@ -82,7 +102,7 @@ namespace PhoneBook.Controllers
             {
                 return NotFound();
             }
-            ViewData["PersonPhone"] = new SelectList(_context.Persons, "PersonId", "PersonId", phone.PersonPhone);
+            ViewData["PersonPhone"] = new SelectList(_context.Persons, "PersonId", "Name", phone.PersonPhone);
             return View(phone);
         }
 
@@ -116,7 +136,8 @@ namespace PhoneBook.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
+                return RedirectToRoute(new { controller="Person", action="Index"});
             }
             ViewData["PersonPhone"] = new SelectList(_context.Persons, "PersonId", "PersonId", phone.PersonPhone);
             return View(phone);
@@ -149,7 +170,8 @@ namespace PhoneBook.Controllers
             var phone = await _context.Phones.FindAsync(id);
             _context.Phones.Remove(phone);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            //return RedirectToAction(nameof(Index));
+            return RedirectToRoute(new { controller="Person", action="Index"});
         }
 
         private bool PhoneExists(int id)
